@@ -10,8 +10,7 @@
 </style>
 </head>
 <body>
-<input type="file" id="imageLoader" name="imageLoader"/>
-<canvas id="imageCanvas"></canvas>
+<input type="file" id="imageLoader" name="imageLoader" accept="image/*"/>
 <br>
 <label for="watermark">Watermark Text:</label>
 <input type="text" id="watermark" placeholder="Enter watermark text"/>
@@ -39,6 +38,7 @@
 <input type="range" id="yspacing" min="50" max="300" value="100"/>
 <span id="yspacing-value">100</span>px
 <br>
+<canvas id="imageCanvas"></canvas>
 <script>
   var imageLoader = document.getElementById('imageLoader');
   var canvas = document.getElementById('imageCanvas');
