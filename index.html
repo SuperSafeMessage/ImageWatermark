@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image Watermark Canvas</title>
+<style>
+  canvas {
+    border: 1px solid black;
+  }
+</style>
+</head>
+<body>
+<input type="file" id="imageLoader" name="imageLoader"/>
+<canvas id="imageCanvas"></canvas>
+<br>
+<label for="watermark">Watermark Text:</label>
+<input type="text" id="watermark" placeholder="Enter watermark text"/>
+<br>
+<label for="fontsize">Font Size:</label>
+<input type="range" id="fontsize" min="10" max="72" value="20"/>
+<span id="fontsize-value">20</span>px
+<br>
+<label for="color">Watermark Color:</label>
+<input type="color" id="color"/>
+<br>
+<label for="opacity">Watermark Opacity (0-1):</label>
+<input type="range" id="opacity" min="0" max="1" step="0.1" value="0.5"/>
+<span id="opacity-value">0.5</span>
+<br>
+<label for="angle">Rotation Angle:</label>
+<input type="range" id="angle" min="0" max="360" value="0"/>
+<span id="angle-value">0</span>°
+<br>
+<label for="xspacing">Horizontal Spacing:</label>
+<input type="range" id="xspacing" min="50" max="300" value="100"/>
+<span id="xspacing-value">100</span>px
+<br>
+<label for="yspacing">Vertical Spacing:</label>
+<input type="range" id="yspacing" min="50" max="300" value="100"/>
+<span id="yspacing-value">100</span>px
+<br>
+<script>
+  var imageLoader = document.getElementById('imageLoader');
+  var canvas = document.getElementById('imageCanvas');
+  var ctx = canvas.getContext('2d');
+  var img = new Image();
+
+  imageLoader.addEventListener('change', handleImage, false);
+
+  function handleImage(e){
+    var reader = new FileReader();
+    reader.onload = function(event){
+        img.onload = function(){
+            canvas.width = img.width;
+            canvas.height = img.height;
+            drawCanvas();
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);     
+  }
+
+  function drawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    addWatermark();
+  }
+
+  document.getElementById('watermark').addEventListener('input', addWatermark);
+  document.querySelectorAll('input[type=range]').forEach(item => {
+    item.addEventListener('input', function() {
+      addWatermark();
+      document.getElementById(item.id + '-value').textContent = item.value;
+    });
+  });
+
+  function addWatermark() {
+    var watermark = document.getElementById('watermark').value;
+    var fontsize = document.getElementById('fontsize').value;
+    var color = document.getElementById('color').value;
+    var opacity = document.getElementById('opacity').value;
+    var angle = document.getElementById('angle').value;
+    var xspacing = parseInt(document.getElementById('xspacing').value);
+    var yspacing = parseInt(document.getElementById('yspacing').value);
+
+    ctx.drawImage(img, 0, 0); // Redraw the image to clear previous watermarks
+    ctx.font = fontsize + "px Arial";
+    ctx.fillStyle = color;
+
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.translate(-canvas.width/2, -canvas.height/2);
+
+    ctx.globalAlpha = opacity; // Set opacity for watermark only
+    const diagonal = Math.sqrt(canvas.width ** 2 + canvas.height ** 2);
+    
+    for(let x = -diagonal; x < diagonal; x += xspacing){
+      for(let y = -diagonal; y < diagonal; y += yspacing){
+        ctx.fillText(watermark, x, y);
+      }
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1; // Reset the global alpha to avoid affecting the rest of the canvas
+  }
+</script>
+</body>
+</html>
